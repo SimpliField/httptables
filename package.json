@@ -4,12 +4,15 @@
   "description": "HTTP firewall",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test"
+    "test": "mocha test",
+    "coveralls": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha --report lcovonly -- test/*.js -R spec -t 5000 && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
+    "cover": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha --report html -- test/*.js -R spec -t 5000"
   },
   "author": "SimpliField <georges.plancke@simplifield.com>",
   "license": "MIT",
   "devDependencies": {
     "express": "^4.11.0",
+    "istanbul": "^0.3.5",
     "mocha": "^2.1.0"
   },
   "files": [

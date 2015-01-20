@@ -1,2 +1,4 @@
 experiments.js
 *.sublime-*
+coverage/
+node_modules/
