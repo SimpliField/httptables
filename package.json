@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "HTTP firewall",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:SimpliField/httptables.git"
+  },
   "scripts": {
     "test": "mocha test",
     "coveralls": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha --report lcovonly -- test/*.js -R spec -t 5000 && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
