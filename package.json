@@ -1,0 +1,21 @@
+{
+  "name": "httptables",
+  "version": "0.0.1",
+  "description": "HTTP firewall",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "author": "SimpliField <georges.plancke@simplifield.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "express": "^4.11.0",
+    "mocha": "^2.1.0"
+  },
+  "files": [
+    "README.md"
+  ],
+  "dependencies": {
+    "debug": "^2.1.1"
+  }
+}
