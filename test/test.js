@@ -22,7 +22,7 @@ describe('HTTPTables', function () {
     assert.equal(typeof httptables, 'object');
   });
 
-  it('ACCEPT should be the default policy', function () {
+  it('should have ACCEPT set as the default policy', function () {
     httptables = HTTPTables();
     assert(httptables.defaultPolicy === httptables.policies.ACCEPT);
   });
@@ -44,6 +44,10 @@ describe('HTTPTables', function () {
     httptables = HTTPTables();
     httptables.setAccessFieldFunction(dummy);
     assert(httptables.accessField === dummy);
+  });
+
+  it('should not allow to change the field accessor method if it is not a function', function () {
+    httptables = HTTPTables();
     assert.throws(function () {
       httptables.setAccessFieldFunction('Blop');
     });
@@ -66,9 +70,88 @@ describe('HTTPTables', function () {
     });
   });
 
+  it('should fail if conditions are not set', function () {
+    var rules = [{
+      policy : 'DROP',
+      conditions : ''
+    }];
+    var req = {
+      headers : {
+        'URL' : "/test",
+        'METHOD' : 'POST',
+        'ACCEPT-ENCODING' : 'application/json',
+        'X-SF-VERSION' : '1.0',
+        'X-SF-TPL' : 'test11'
+      }
+    };
+    httptables = HTTPTables();
+    assert.throws(function () {
+      httptables.applyRules(req, rules);
+    });
+
+  });
+
   it('should return default policy if rules are empty', function () {
     httptables = HTTPTables();
     var policy = httptables.applyRules({}, []);
+    assert(policy === httptables.defaultPolicy);
+  });
+
+  it('should return default policy if req headers are not set', function () {
+    var rules = [{
+      policy : 'DROP',
+      conditions : {
+        'url' : /test/,
+        'method' : ['POST', 'GET'],
+        'accept-encoding' : function (value) {
+          return ['application/json', 'text/html'];
+        },
+        'x-sf-version' : '1.0',
+        'x-sf-tpl' : {
+          instruction : function (a1, a2) {
+            return [a1, a2];
+          },
+          args : [ new RegExp("test1") , 'tpl']
+        }
+      }
+    }];
+    var req = {};
+    httptables = HTTPTables();
+    var policy = httptables.applyRules(req, rules);
+    assert(policy === httptables.defaultPolicy);
+  });
+
+  it('should not match if req headers are missing a condition', function () {
+    var rules = [{
+      policy : 'DROP',
+      conditions : {
+        'url' : /test/,
+        'method' : ['POST', 'GET'],
+        'accept-encoding' : function (value) {
+          return ['application/json', 'text/html'];
+        },
+        'x-sf-version' : '1.0',
+        'x-sf-tpl' : {
+          instruction : function (a1, a2) {
+            return [a1, a2];
+          },
+          args : [ new RegExp("test1") , 'tpl']
+        }
+      }
+    }];
+    var req = {
+      headers : {
+        'URL' : "/test",
+        'METHOD' : 'POST',
+        'ACCEPT-ENCODING' : 'application/json',
+        'X-SF-VERSION' : '1.0',
+      }
+    };
+    httptables = HTTPTables();
+    var policy = httptables.applyRules(req, rules);
+    assert(policy === httptables.defaultPolicy);
+    req.headers['X-SF-TPL'] = null;
+    policy = httptables.applyRules(req, rules);
     assert(policy === httptables.defaultPolicy);
   });
 
@@ -86,17 +169,17 @@ describe('HTTPTables', function () {
           instruction : function (a1, a2) {
             return [a1, a2];
           },
-          args : [ /test1/ , 'tpl']
+          args : [ new RegExp("test1") , 'tpl']
         }
       }
     }];
     var req = {
       headers : {
-        'url' : "/test",
-        'method' : 'POST',
-        'accept-encoding' : 'application/json',
-        'x-sf-version' : '1.0',
-        'x-sf-tpl' : 'test11'
+        'URL' : "/test",
+        'METHOD' : 'POST',
+        'ACCEPT-ENCODING' : 'application/json',
+        'X-SF-VERSION' : '1.0',
+        'X-SF-TPL' : 'test11'
       }
     };
     httptables = HTTPTables();
@@ -108,17 +191,17 @@ describe('HTTPTables', function () {
     var rules = [{
       policy : 'ACCEPT',
       conditions : {
-        'url' : /blop/,
+        'url' : /test/,
         'method' : ['POST', 'GET'],
         'accept-encoding' : function (value) {
-          return ['application/json', 'text/html'];
+          return false;
         },
         'x-sf-version' : '1.0',
         'x-sf-tpl' : {
           instruction : function (a1, a2) {
             return [a1, a2];
           },
-          args : [ /test1/ , 'tpl']
+          args : [ new RegExp("test1") , 'tpl']
         }
       },
     },
@@ -135,22 +218,22 @@ describe('HTTPTables', function () {
           instruction : function (a1, a2) {
             return [a1, a2];
           },
-          args : [ /test1/ , 'tpl']
+          args : [ new RegExp("test1") , 'tpl']
         }
       }
     }];
     var req = {
       headers : {
-        'url' : "/test",
-        'method' : 'POST',
-        'accept-encoding' : 'application/json',
-        'x-sf-version' : '1.0',
-        'x-sf-tpl' : 'test11'
+        'URL' : "/test",
+        'METHOD' : 'POST',
+        'ACCEPT-ENCODING' : 'application/json',
+        'X-SF-VERSION' : '1.0',
+        'X-SF-TPL' : 'test11'
       }
     };
     httptables = HTTPTables();
     var policy = httptables.applyRules(req, rules);
-    assert(policy === httptables.policies[rules[0].policy]);
+    assert(policy === httptables.policies[rules[1].policy]);
   });
 
 });
