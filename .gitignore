@@ -3,3 +3,4 @@ experiments.js
 coverage/
 node_modules/
 npm-debug.log
+.coveralls.yml
