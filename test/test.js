@@ -5,7 +5,7 @@ var httptables = null;
 var allRules = [
 {
   name : 'Good rule',
-  policy : 'DROP',
+  policy : HTTPTables.policies.DROP,
   conditions : {
     'url' : /test/,
     'method' : ['POST', 'GET'],
@@ -22,7 +22,7 @@ var allRules = [
   }
 },
 {
-  policy : 'ACCEPT',
+  policy : HTTPTables.policies.ACCEPT,
   conditions : {
     'url' : /test/,
     'method' : ['POST', 'GET'],
@@ -39,12 +39,12 @@ var allRules = [
   },
 },
 {
-  policy : 'DROP',
+  policy : HTTPTables.policies.DROP,
   conditions : ''
 },
-['DROP', {}],
+[HTTPTables.policies.DROP, {}],
 {
-  policy : 'WHAT??',
+  policy : HTTPTables.policies.WHAT,
   conditions : {
     'url' : /test/,
     'method' : ['POST', 'GET'],
@@ -107,17 +107,17 @@ describe('HTTPTables', function () {
 
   it('should have ACCEPT set as the default policy', function () {
     httptables = HTTPTables();
-    assert(httptables.defaultPolicy === httptables.policies.ACCEPT);
+    assert(httptables.defaultPolicy === HTTPTables.policies.ACCEPT);
   });
 
   it('should fallback to default policy if the one provided does not exist', function () {
     httptables = HTTPTables({defaultPolicy : 'WAZA'});
-    assert(httptables.defaultPolicy === httptables.policies.ACCEPT);
+    assert(httptables.defaultPolicy === HTTPTables.policies.ACCEPT);
   });
 
   it('should allow to change default policy', function () {
-    httptables = HTTPTables({defaultPolicy : 'DROP'});
-    assert(httptables.defaultPolicy === httptables.policies.DROP);
+    httptables = HTTPTables({defaultPolicy : HTTPTables.policies.DROP});
+    assert(httptables.defaultPolicy === HTTPTables.policies.DROP);
   });
 
   it('should allow to change the field accessor method only if it is a function', function () {
@@ -204,21 +204,13 @@ describe('HTTPTables', function () {
     assert(policy === httptables.defaultPolicy);
   });
 
-  it('should return the correct matching policy', function () {
-    var rules = [allRules[0]];
-    var req = requests.correct;
-
-    httptables = HTTPTables();
-    assert(httptables.applyRules(req, rules) === httptables.policies[rules[0].policy]);
-  });
-
   it('should return the correct matching policy in the right order', function () {
     var rules = [allRules[1], allRules[0]];
     var req = requests.correct;
     var policy = null;
 
     httptables = HTTPTables();
-    assert(httptables.applyRules(req, rules) === httptables.policies[rules[1].policy]);
+    assert(httptables.applyRules(req, rules) === rules[1].policy);
   });
 
   it('should return the default policy if provided matching policy is not defined', function () {
@@ -229,5 +221,14 @@ describe('HTTPTables', function () {
     httptables = HTTPTables();
     assert(httptables.applyRules(req, rules) === httptables.defaultPolicy);
   });
+
+  it('should return the correct matching policy against local rules', function () {
+    var rules = [allRules[0]];
+    var req = requests.correct;
+
+    httptables = HTTPTables({rules : rules});
+    assert(httptables.test(req) === rules[0].policy);
+  });
+
 
 });
