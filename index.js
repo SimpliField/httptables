@@ -1,1 +1,1 @@
-require('./lib/httptables');
+module.exports = require('./lib/httptables');
